@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tip Calculator BD</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="header-row">
+    <div>
+      <h1 id="title">Tip Calculator BD</h1>
+      <p class="subtitle" data-i18n="subtitle"></p>
+    </div>
+    <button id="langBtn" class="btn ghost" type="button">Bangla</button>
+  </div>
+  <nav class="tabs" aria-label="Sections">
+    <button type="button" class="tab active" data-tab="calc" data-i18n="tab_calc">Calculator</button>
+    <button type="button" class="tab" data-tab="saved" data-i18n="tab_saved">Saved</button>
+    <button type="button" class="tab" data-tab="guide" data-i18n="tab_guide">Guide</button>
+  </nav>
+</header>
+
+<main>
+  <!-- Calculator -->
+  <section class="tab-panel" data-panel="calc">
+    <div class="card">
+      <label class="field-label" for="billInput" data-i18n="billLabel">Bill amount (Tk)</label>
+      <input id="billInput" type="text" inputmode="decimal" autocomplete="off" data-i18n-ph="billPh" placeholder="e.g. 1250">
+      <p class="hint" data-i18n="billHint"></p>
+      <p class="error" id="billError" hidden></p>
+    </div>
+
+    <div class="card">
+      <label class="field-label" for="tipInput" data-i18n="tipLabel">Tip %</label>
+      <div class="preset-row" role="group" aria-label="Tip presets">
+        <button type="button" class="chip" data-tip="0">0%</button>
+        <button type="button" class="chip" data-tip="5">5%</button>
+        <button type="button" class="chip" data-tip="10">10%</button>
+        <button type="button" class="chip" data-tip="15">15%</button>
+        <button type="button" class="chip" data-tip="20">20%</button>
+      </div>
+      <input id="tipInput" type="text" inputmode="decimal" autocomplete="off" data-i18n-ph="tipCustom" placeholder="Custom %">
+      <p class="error" id="tipError" hidden></p>
+    </div>
+
+    <div class="card">
+      <label class="field-label" for="scInput" data-i18n="scLabel">Service charge %</label>
+      <div class="preset-row" role="group" aria-label="Service charge presets">
+        <button type="button" class="chip" data-sc="0">0%</button>
+        <button type="button" class="chip" data-sc="5">5%</button>
+        <button type="button" class="chip" data-sc="10">10%</button>
+      </div>
+      <input id="scInput" type="text" inputmode="decimal" autocomplete="off" data-i18n-ph="tipCustom" placeholder="Custom %">
+      <p class="hint" data-i18n="scHint"></p>
+      <p class="error" id="scError" hidden></p>
+    </div>
+
+    <div class="card">
+      <label class="check-row">
+        <input id="vatCheck" type="checkbox">
+        <span data-i18n="vatLabel">Add 15% VAT</span>
+      </label>
+      <p class="hint" data-i18n="vatNote"></p>
+    </div>
+
+    <div class="card">
+      <span class="field-label" data-i18n="peopleLabel">People splitting</span>
+      <div class="stepper">
+        <button type="button" id="peopleMinus" class="btn stepper-btn" aria-label="Fewer people">&minus;</button>
+        <input id="peopleInput" type="text" inputmode="numeric" autocomplete="off" value="1" aria-label="People">
+        <button type="button" id="peoplePlus" class="btn stepper-btn" aria-label="More people">+</button>
+      </div>
+      <p class="error" id="peopleError" hidden></p>
+    </div>
+
+    <div class="card">
+      <span class="field-label" data-i18n="roundLabel">Round up total to</span>
+      <div class="radio-row">
+        <label><input type="radio" name="round" value="0" checked> <span data-i18n="roundNone">No rounding</span></label>
+        <label><input type="radio" name="round" value="500"> <span data-i18n="round5">Nearest Tk 5</span></label>
+        <label><input type="radio" name="round" value="1000"> <span data-i18n="round10">Nearest Tk 10</span></label>
+      </div>
+    </div>
+
+    <div class="card result-card">
+      <h2 data-i18n="resultTitle">Your bill</h2>
+      <p id="resultEmpty" class="empty" data-i18n="resultEmpty">Enter a bill amount to see the breakdown here.</p>
+      <div id="resultContent" hidden>
+        <dl class="breakdown">
+          <div class="row"><dt data-i18n="rowBill">Bill</dt><dd id="valBill">-</dd></div>
+          <div class="row"><dt data-i18n="rowTip">Tip</dt><dd id="valTip">-</dd></div>
+          <div class="row"><dt data-i18n="rowService">Service charge</dt><dd id="valService">-</dd></div>
+          <div class="row" id="rowVat" hidden><dt data-i18n="rowVat">VAT (15%)</dt><dd id="valVat">-</dd></div>
+          <div class="row" id="rowRoundExtra" hidden><dt data-i18n="rowRoundExtra">Round-up extra</dt><dd id="valRoundExtra">-</dd></div>
+          <div class="row total"><dt data-i18n="rowTotal">Grand total</dt><dd id="valTotal">-</dd></div>
+          <div class="row"><dt data-i18n="rowPerPerson">Per person</dt><dd id="valPerPerson">-</dd></div>
+          <div class="row"><dt data-i18n="rowPerPersonTip">Tip per person</dt><dd id="valPerPersonTip">-</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="saveTitle">Save this calculation</h2>
+      <div class="save-row">
+        <input id="saveName" type="text" maxlength="60" autocomplete="off" data-i18n-ph="saveNamePh" placeholder="Name (e.g. Friday dinner)">
+        <button type="button" id="saveBtn" class="btn primary" data-i18n="saveBtn">Save calculation</button>
+      </div>
+      <p class="ok" id="saveMsg" hidden data-i18n="savedMsg">Calculation saved.</p>
+    </div>
+  </section>
+
+  <!-- Saved -->
+  <section class="tab-panel" data-panel="saved" hidden>
+    <div class="card">
+      <h2 data-i18n="savedTitle">Saved calculations</h2>
+      <p id="savedEmpty" class="empty" data-i18n="savedEmpty">No saved calculations yet.</p>
+      <div id="savedList"></div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="dataTitle">Your data</h2>
+      <button type="button" id="exportBtn" class="btn" data-i18n="exportBtn">Export JSON</button>
+      <textarea id="importText" rows="4" data-i18n-ph="importPh" placeholder="Paste exported JSON here..."></textarea>
+      <button type="button" id="importBtn" class="btn" data-i18n="importBtn">Import</button>
+      <p class="ok" id="importOk" hidden data-i18n="importOk">Import complete.</p>
+      <p class="error" id="importFail" hidden></p>
+    </div>
+
+    <div class="card danger-zone">
+      <h2 data-i18n="eraseTitle">Erase all data</h2>
+      <p data-i18n="eraseLabel">Type DELETE to erase all saved calculations.</p>
+      <div class="save-row">
+        <input id="eraseInput" type="text" autocomplete="off" placeholder="DELETE">
+        <button type="button" id="eraseBtn" class="btn danger" data-i18n="eraseBtn">Erase all</button>
+      </div>
+      <p class="error" id="eraseWrong" hidden data-i18n="eraseWrong">Type DELETE exactly.</p>
+      <p class="ok" id="erasedMsg" hidden data-i18n="erasedMsg">All saved calculations erased.</p>
+    </div>
+  </section>
+
+  <!-- Guide -->
+  <section class="tab-panel" data-panel="guide" hidden>
+    <div class="card">
+      <h2 data-i18n="guideTitle">Tipping in Bangladesh - general ideas</h2>
+      <ol id="guideList" class="guide-list">
+        <li data-i18n="guide_1"></li>
+        <li data-i18n="guide_2"></li>
+        <li data-i18n="guide_3"></li>
+        <li data-i18n="guide_4"></li>
+        <li data-i18n="guide_5"></li>
+        <li data-i18n="guide_6"></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p id="footerText"></p>
+</footer>
+
+<script src="js/logic.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
